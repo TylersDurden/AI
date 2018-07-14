@@ -1,4 +1,8 @@
 #!/bin/python
+"""
+<|AUTOMATA|>
+@author TylersDurden
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -42,7 +46,8 @@ class AUTOMATA:
         r0t1 = np.concatenate((np.concatenate((i2i,stoop),1),np.concatenate((stoop,xros),1)),1)
         w1de = np.concatenate((w1de, w1de), 1)
 
-        shapes = list()
+        shapes = []
+
         shapes.append(eye)
         shapes.append(i2i)
         shapes.append(stoop)
@@ -88,17 +93,61 @@ class AUTOMATA:
         #plt.show()
 
         bigger_shapes = []
-        for s in shapes:
-          for sh in shapes:
-              if s.shape==sh.shape:
-                img = np.concatenate((np.concatenate((s,sh),1),np.concatenate((sh,s),1)),0)
-                Img = np.concatenate((np.concatenate((sh,s),1),np.concatenate((s,sh),1)),0)
-                plt.imshow(img,'gray')
-                plt.show()
-                plt.imshow(Img,'gray')
-                plt.show()
-                bigger_shapes.append(img)
-                bigger_shapes.append(Img)
+        for s in shapes.__iter__():
+            for sh in shapes.__iter__():
+                if s.shape==sh.shape:
+                    img = np.concatenate((np.concatenate((s,sh),1),np.concatenate((sh,s),1)),0)
+                    Img = np.concatenate((np.concatenate((sh,s),1),np.concatenate((s,sh),1)),0)
+                    plt.imshow(img,'gray')
+                    #plt.show()
+                    plt.imshow(Img,'gray')
+                    #plt.show()
+                    bigger_shapes.append(img)
+                    bigger_shapes.append(Img)
+
+        rand_shapes = self.shapeGenerator(shapes)
+        fractals = self.shapeGenerator(rand_shapes)
+
+    def shapeGenerator(self,primitives):
+        shapes = []
+        i = 0
+        for a in primitives:
+            for b in primitives:
+                try:
+                    i0 = np.concatenate((np.concatenate((a,b),0),np.concatenate((b,a),0)),1)
+                    i1 = np.concatenate((np.concatenate((b,a),0),np.concatenate((a,b),0)),1)
+                    i2 = np.concatenate((np.concatenate((a,b),1),np.concatenate((b,a),1)),0)
+                    i3 = np.concatenate((np.concatenate((b,a),1),np.concatenate((a,b),1)),0)
+                    # Save new shapes
+                    shapes.append(i0)
+                    shapes.append(i1)
+                    shapes.append(i2)
+                    shapes.append(i3)
+                    I0 = np.concatenate((i0, i1), 1)
+                    I1 = np.concatenate((i2, i3), 0)
+                    plt.imshow(I0, 'gray')
+                    plt.show()
+                    plt.imshow(I1, 'gray')
+                    plt.show()
+                except ValueError:
+                        i += 1 # Don't really do anything actually.
+                try:
+                    i4 = np.concatenate((np.concatenate((a,b),1),np.concatenate((b,a),1)),1)
+                    i5 = np.concatenate((np.concatenate((b,a),1),np.concatenate((a,b),1)),0)
+                    shapes.append(i4)
+                    shapes.append(i5)
+                    I2 = np.concatenate((i4,i5),0)
+                    I3 = np.concatenate((i5,i4),1)
+                    shapes.append(i4)
+                    shapes.append(i5)
+                    plt.imshow(I2,'gray')
+                    plt.show()
+                    plt.imshow(I3,'gray')
+                    plt.show()
+                except ValueError:
+                        i += 1
+            return shapes
+
 
 def main():
     AUTOMATA()
