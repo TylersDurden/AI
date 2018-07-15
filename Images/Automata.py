@@ -5,7 +5,7 @@
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from PIL import Image
+import matplotlib
 import sys, os
 
 
@@ -18,7 +18,9 @@ class AUTOMATA:
 
     ones = [[1, 1, 1], [1, 1, 1], [1, 1, 1]]
     zeta = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+
     diag = [[1, 0, 1], [0, 1, 0], [1, 0, 1]]
+    jag =  [[1, 1, 1], [1, 1, 0], [1, 0, 0]]
     invr = [[1, 1, 1], [1, 0, 1], [1, 1, 1]]
     st3p = [[1, 1, 0], [1, 0, 0], [0, 1, 1]]
     st0p = [[0, 0, 1], [0, 1, 1], [1, 1, 1]]
@@ -30,24 +32,72 @@ class AUTOMATA:
     c = [[0, 0, 0], [0, 1, 1], [0, 0, 0]]
 
     def __init__(self):
-        self.initializeIntegerMapping()
+        # Test simple automata of generic shapes
+        # self.first_shapes = self.initializeIntegerMapping()
+        # fractals = self.shapeGenerator(self.fiirst_shapes)
+        # Figure out different color schemes
+        self.color_spectra()
+
+    def color_spectra(self):
+        """
+        Experimenting with the color schemes possible for
+        graphics with different data, and layouts
+        :return:
+        """
+        blue_leaf9 = np.array([[1,2,3],[4,5,6],[7,8,9]])
+        red_leaf9 = np.array([[1,2,3],[4,5,6],[7,8,9]])
+        plt.imshow(blue_leaf9,'Blues')
+        plt.show()
+        test_data = np.array([[4,5,3],[2,0,8],[7,1,6]])
+        xlabels = ['r0','r1','r2']
+        ylabels = ['c0','c1','c2']
+        title = 'random'
+        self.categorical_mapping(test_data,xlabels,ylabels,title, 'gray')
+
+    @staticmethod
+    def categorical_mapping(data, xlabels, ylabels, title, style):
+        """
+        Create a tiled plot with x and y labels, and labeled data.
+        Graph is rendered with the color scheme specified with the
+        style param.
+        :param data:
+        :param xlabels:
+        :param ylabels:
+        :param title:
+        :param style:
+        :return:
+        """
+        fig, ax = plt.subplots()
+        im = ax.imshow(data, style)
+        # Set the tick marks
+        ax.set_xticks(np.arange(len(xlabels)))
+        ax.set_yticks(np.arange(len(ylabels)))
+        ax.set_xticklabels(xlabels)
+        ax.set_yticklabels(ylabels)
+        # Rotate to prevent clutter
+        plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+        # Label each cell
+        for i in range(len(ylabels)):
+            for j in range(len(xlabels)):
+                text = ax.text(j,i,data[i,j],ha="center",va="center",color="w")
+        ax.set_title(title)
+        fig.tight_layout()
+        plt.show()
 
     def initializeIntegerMapping(self):
         eye = np.concatenate((self.ones, self.dots, self.ones), 0)
         i2i = np.concatenate((self.dots, self.ones, self.dots), 0)
         stoop = np.concatenate((self.st0p, self.st3p, self.st0p), 0)
         xros = np.concatenate((self.xros, self.dots, self.xros), 0)
-
-
+        # Start using these shapes to make more complex shapes
         mess = np.concatenate((xros, stoop), 1)
         m3ss = np.concatenate((np.concatenate((xros,stoop),1),np.concatenate((xros,stoop),1)),0)
         m4ss = np.concatenate((np.concatenate((stoop,xros),1),np.concatenate((xros,stoop),1)),0)
         w1de = np.concatenate((np.concatenate((xros,stoop),0),np.concatenate((xros,stoop),0)),0)
         r0t1 = np.concatenate((np.concatenate((i2i,stoop),1),np.concatenate((stoop,xros),1)),1)
         w1de = np.concatenate((w1de, w1de), 1)
-
-        shapes = []
-
+        # Now collect all the shapes made
+        shapes = list()
         shapes.append(eye)
         shapes.append(i2i)
         shapes.append(stoop)
@@ -58,39 +108,6 @@ class AUTOMATA:
         shapes.append(w1de)
         shapes.append(r0t1)
         #shapes.append(w33d)
-
-        #plt.imshow(eye, 'gray')
-        #plt.show()
-        #plt.imshow(i2i, 'gray')
-        #plt.title('i2i')
-        #plt.show()
-        #plt.imshow(stoop, 'gray')
-        #plt.show()
-        #plt.title('st00p')
-        #plt.imshow(xros,'gray')
-        #plt.show()
-        #plt.title('xros')
-        #plt.imshow(mess,'gray')
-        #plt.show()
-        #plt.title('messy')
-        plt.imshow(m3ss,'gray')
-        plt.title('m3ss')
-        plt.plot()
-        #plt.show()
-
-        plt.imshow(m4ss,'gray')
-        plt.title('m4ss')
-        #plt.show()
-
-        plt.imshow(r0t1,'gray')
-        plt.title('rotated ?')
-        #plt.show()
-
-        plt.imshow(w1de,'gray')
-        #plt.show()
-
-        plt.imshow(self.a,'gray')
-        #plt.show()
 
         bigger_shapes = []
         for s in shapes.__iter__():
@@ -105,8 +122,9 @@ class AUTOMATA:
                     bigger_shapes.append(img)
                     bigger_shapes.append(Img)
 
+        # Recursively build up the same shapes
         rand_shapes = self.shapeGenerator(shapes)
-        fractals = self.shapeGenerator(rand_shapes)
+        return rand_shapes
 
     def shapeGenerator(self,primitives):
         shapes = []
@@ -149,8 +167,35 @@ class AUTOMATA:
             return shapes
 
 
+class TilePuzzle:
+
+    tiles = []
+    table = [[]]
+
+    def __init__(self, n):
+        self.N = n
+        # Creating an NxN Tiled puzzle game
+        self.tiles = np.random.random_integers(0, self.N, self.N)
+        self.table = self.make_tile_table()
+        self.illustrate_tiles()
+
+    def make_tile_table(self):
+        table = [[]]
+
+
+        return table
+
+    def illustrate_tiles(self):
+        xlabels = ['Col.1', 'Col.2', 'Col.3']
+        ylabels = ['Row 1', 'Row 2', 'Row 3']
+        title = 'Puzzle Layout'
+        style = 'BrBG'
+        AUTOMATA.categorical_mapping(self.table, xlabels, ylabels, title, style)
+
+
 def main():
-    AUTOMATA()
+    # AUTOMATA()
+    TilePuzzle(4)
 
 
 if __name__ == '__main__':

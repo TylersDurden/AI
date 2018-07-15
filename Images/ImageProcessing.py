@@ -26,15 +26,15 @@ class ImageProcessing:
         cell1, row1, quart1 = self.divideNanalyze(quarts.pop(1))
         cell2, row2, quart2 = self.divideNanalyze(quarts.pop(2))
         # Divide and Analyze these subdivisions as well!
-        while(len(quarts)>0):
+        while len(quarts) > 0:
             cells, rows, quarts = self.divideNanalyze(quarts.pop(0))
             if quarts.pop().shape[0] < 16:
                 break
-        while(len(quart1)>0):
+        while len(quart1) > 0:
             cell1, row1, quart1 = self.divideNanalyze(quart1.pop(1))
             if quart1.pop().shape[0]<16:
                 break
-        while len(quart2)>0:
+        while len(quart2) > 0:
             cell1, row1, quart2 = self.divideNanalyze(quart2.pop(2))
             if quart2.pop().shape[0] < 16:
                 break
