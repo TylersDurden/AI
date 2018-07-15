@@ -21,8 +21,25 @@ class ImageProcessing:
         # Start creating shapes to detect features of
         # image inputs matrix and cmap
         self.find_face(matrix,cmap)
+        # break the image up into a many cells of various shapes
+        cells, rows, quarts = self.divideNanalyze(matrix)
+        cell1, row1, quart1 = self.divideNanalyze(quarts.pop(1))
+        cell2, row2, quart2 = self.divideNanalyze(quarts.pop(2))
+        # Divide and Analyze these subdivisions as well!
+        while(len(quarts)>0):
+            cells, rows, quarts = self.divideNanalyze(quarts.pop(0))
+            if quarts.pop().shape[0] < 16:
+                break
+        while(len(quart1)>0):
+            cell1, row1, quart1 = self.divideNanalyze(quart1.pop(1))
+            if quart1.pop().shape[0]<16:
+                break
+        while len(quart2)>0:
+            cell1, row1, quart2 = self.divideNanalyze(quart2.pop(2))
+            if quart2.pop().shape[0] < 16:
+                break
 
-    def find_face(self,raw_data,cmap):
+    def find_face(self, raw_data,cmap):
 
         print('Beginning Facial Analysis')
         mask = 255*np.ones(raw_data.shape)
@@ -37,7 +54,130 @@ class ImageProcessing:
     def visual_check(self, mats):
         for matrix in mats:
             plt.imshow(matrix,'gray')
-            #plt.show()
+            print('loaded'+str(matrix.shape[0])+'x'+str(matrix.shape[1])+' primitive')
+            # plt.show()
+
+    def divideNanalyze(self, matrix):
+        """
+
+        :param matrix:
+        :return:
+        """
+        qx_size = int(matrix.shape[0]/4)
+        qy_size = int(matrix.shape[1]/4)
+        print('Subdiving ' + str(matrix.shape[0]) + 'x' + str(matrix.shape[1]) + ' into 4 '+
+              str(qx_size) + 'x' + str(qy_size) + 'pics')
+        # Left colum of the 4x4 slices
+        l1 = np.array(matrix[0:qx_size,0:qy_size])
+        l2 = np.array(matrix[qx_size:2*qx_size,0:qy_size])
+        l3 = np.array(matrix[qx_size*2:qx_size*3,0:qy_size])
+        l4 = np.array(matrix[3*qx_size:4*qx_size, 0:qy_size])
+        # Mid-Left column of the 4x4 slices
+        ml1 = np.array(matrix[0:qx_size,qy_size:2*qy_size])
+        ml2 = np.array(matrix[qx_size:2*qx_size,qy_size:2*qy_size])
+        ml3 = np.array(matrix[2*qx_size:3*qx_size,qy_size:2*qy_size])
+        ml4 = np.array(matrix[3*qx_size:4*qx_size,qy_size:2*qy_size])
+        # Mid-Right column of the 4x4 slices
+        mr1 = np.array(matrix[0:qx_size,2*qy_size:3*qy_size])
+        mr2 = np.array(matrix[qx_size:2*qx_size,2*qy_size:3*qy_size])
+        mr3 = np.array(matrix[2*qx_size:3*qx_size,2*qy_size:3*qy_size])
+        mr4 = np.array(matrix[3*qx_size:4*qx_size,2*qy_size:3*qy_size])
+        # Right column of the 4x4 slices
+        r1 = np.array(matrix[0:qx_size,3*qy_size:4*qy_size])
+        r2 = np.array(matrix[qx_size:2*qx_size,3*qy_size:4*qy_size])
+        r3 = np.array(matrix[2*qx_size:3*qx_size,3*qy_size:4*qy_size])
+        r4 = np.array(matrix[3*qx_size:4*qx_size,3*qy_size:4*qy_size])
+
+        row1 = np.concatenate((l1,ml1,mr1,r1),1)
+        row2 = np.concatenate((l2,ml2,mr2,r2),1)
+        row3 = np.concatenate((l3,ml3,mr3,r3),1)
+        row4 = np.concatenate((l4,ml4,mr4,r4),1)
+
+        i0 = (np.concatenate((mr1, r1),1))
+        i1 = np.concatenate((mr2,r2),1)
+        i2 = np.concatenate((mr3,r3),1)
+        i3 = np.concatenate((mr4,r4),1)
+
+        q1 = np.concatenate((np.concatenate((l1,ml1),1),np.concatenate((l2,ml2),1)),0)
+        q2 = np.concatenate((i0,i1),0)
+        q3 = np.concatenate((np.concatenate((l3,ml3),1),np.concatenate((l4,ml4),1)),0)
+        q4 = np.concatenate((i2,i3),0)
+        plt.imshow(row1)
+        plt.title('Top Row')
+        plt.show()
+        plt.imshow(row2)
+        plt.title('Upper-Middle Row')
+        plt.show()
+        plt.imshow(row3)
+        plt.title('Lower-Middle Row')
+        plt.show()
+        plt.imshow(row4)
+        plt.title('Bottom Row')
+        plt.show()
+
+        plt.imshow(q1)
+        plt.title('quarter1')
+        plt.show()
+        plt.imshow(q2)
+        plt.title('quarter2')
+        plt.show()
+        plt.imshow(q3)
+        plt.title('quarter3')
+        plt.show()
+        plt.imshow(q4)
+        plt.title('quarter4')
+        plt.show()
+
+        cells = list()
+        cells.append(l1)
+        cells.append(l2)
+        cells.append(l3)
+        cells.append(l4)
+        cells.append(ml1)
+        cells.append(ml2)
+        cells.append(ml3)
+        cells.append(ml4)
+        cells.append(mr1)
+        cells.append(mr2)
+        cells.append(mr3)
+        cells.append(mr4)
+        cells.append(r1)
+        cells.append(r2)
+        cells.append(r3)
+        cells.append(r4)
+        rows = list()
+        rows.append(row1)
+        rows.append(row2)
+        rows.append(row3)
+        rows.append(row4)
+        quarters = list()
+        quarters.append(q1)
+        quarters.append(q2)
+        quarters.append(q3)
+        quarters.append(q4)
+
+        return cells, rows, quarters
+
+    def hexbin_color_heatmap(self,matrix):
+        np.random.seed(19680801)
+        n = 1000
+        x = np.random.standard_normal(n)
+        y = 2.0 + 3.0 * x + 4.0 * np.random.standard_normal(n)
+        xmin = x.min()
+        xmax = x.max()
+        ymin = y.min()
+        ymax = y.max()
+
+        fig, ax = plt.subplots(ncols = 1, sharey=True, figsize=(7, 4))
+        fig.subplots_adjust(hspace=0.5, left = 0.7, right=0.93)
+        hexbn = ax.hexbin(x,y, gridsize=5, cmap='inferno')
+        ax.axis([xmin, xmax, ymin, ymax])
+        ax.set_title("Hexagon Binning")
+        color = fig.colorbar(hexbn,ax=ax)
+        color.set_label('log10(N)')
+
+
+        plt.show()
 
     def initialize_primitives(self):
         boxy = []
@@ -54,6 +194,7 @@ class ImageProcessing:
         boxy.append(b0x0)
         boxy.append(b0x1)
         boxy.append(b0x2)
+        boxy.append(b0x3)
         chkr.append(chk0)
         chkr.append(chk1)
         chkr.append(chk2)
@@ -122,8 +263,8 @@ class ImageMath:
         print('Brightest Location: '+str(minloc[0])+','+str(minloc[1])+' is ' + str(min))
         range = (max - min)*100/255;
         print('Contrast set to '+str(range)+'%')
-        plt.imshow(scoreMatrix,)
-        plt.show()
+        plt.imshow(scoreMatrix)
+        #plt.show()
         return scoreMatrix
 
 
